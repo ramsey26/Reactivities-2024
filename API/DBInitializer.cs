@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Domain;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Writers;
 
@@ -13,20 +14,36 @@ namespace Persistence
         public static void InitDb(WebApplication webApplication)
         {
             using var scope = webApplication.Services.CreateScope();
+            var services = scope.ServiceProvider;
             try
             {
-                Scope(scope.ServiceProvider.GetService<DataContext>());
+                Scope(services.GetRequiredService<DataContext>(),
+                services.GetRequiredService<UserManager<AppUser>>());
             }
             catch (Exception ex)
             {
-                var logger = scope.ServiceProvider.GetService<ILogger<DBInitializer>>();
+                var logger = services.GetRequiredService<ILogger<DBInitializer>>();
                 logger.LogError(ex, "An error occured during migration");
             }
         }
 
-        private static void Scope(DataContext context)
+        private static async void Scope(DataContext context, UserManager<AppUser> userManager)
         {
             context.Database.Migrate();
+
+            if (!userManager.Users.Any())
+            {
+                var users = new List<AppUser>{
+                    new AppUser{DisplayName = "Bob",UserName = "bob" , Email = "bob@test.com"},
+                    new AppUser{DisplayName = "Tom",UserName = "tom" , Email = "tom@test.com"},
+                    new AppUser{DisplayName = "Jane",UserName = "jane" , Email = "jane@test.com"}
+                };
+
+                foreach (var user in users)
+                {
+                    await userManager.CreateAsync(user, "Pa$$w0rd");
+                }
+            }
 
             if (context.Activities.Any())
             {
@@ -127,8 +144,8 @@ namespace Persistence
                 }
             };
 
-            context.Activities.AddRangeAsync(activities);
-            context.SaveChangesAsync();
+            await context.Activities.AddRangeAsync(activities);
+            await context.SaveChangesAsync();
         }
     }
 }
