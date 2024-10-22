@@ -1,6 +1,4 @@
-import {
-  Grid,
-} from "semantic-ui-react";
+import { Grid } from "semantic-ui-react";
 import { useStore } from "../../../app/stores/store";
 import LoadingComponent from "../../../app/layout/LoadingComponent";
 import { useParams } from "react-router-dom";
@@ -11,6 +9,7 @@ import ActivityDetailedInfo from "./ActivityDetailedInfo";
 import ActivityDetailedChat from "./ActivityDetailedChat";
 import ActivityDetailedSizebar from "./ActivityDetailedSidebar";
 
+// eslint-disable-next-line react-refresh/only-export-components
 export default observer(function ActivityDetails() {
   const { activityStore } = useStore();
   const {
@@ -34,7 +33,7 @@ export default observer(function ActivityDetails() {
         <ActivityDetailedChat />
       </Grid.Column>
       <Grid.Column width={6}>
-        <ActivityDetailedSizebar />
+        <ActivityDetailedSizebar activity={activity} />
       </Grid.Column>
     </Grid>
   );
