@@ -15,10 +15,14 @@ namespace Application.Core
             CreateMap<Activity, Activity>();
             CreateMap<Activity, ActivityDto>()
             .ForMember(dest => dest.HostUsername, o => o.MapFrom(s => s.Attendees.FirstOrDefault(x => x.IsHost).AppUser.UserName));
-            CreateMap<ActivityAttendee, Profiles.Profile>()
+            CreateMap<ActivityAttendee, AttendeeDto>()
             .ForMember(dest => dest.DisplayName, o => o.MapFrom(s => s.AppUser.DisplayName))
             .ForMember(dest => dest.UserName, o => o.MapFrom(s => s.AppUser.UserName))
-            .ForMember(dest => dest.Bio, o => o.MapFrom(s => s.AppUser.Bio));
+            .ForMember(dest => dest.Bio, o => o.MapFrom(s => s.AppUser.Bio))
+            .ForMember(dest => dest.Image, o => o.MapFrom(s => s.AppUser.Photos.FirstOrDefault(x => x.IsMain).Url));
+            
+            CreateMap<AppUser, Profiles.Profile>()
+            .ForMember(dest => dest.Image, o => o.MapFrom(s => s.Photos.FirstOrDefault(x => x.IsMain).Url));
         }
     }
 }
